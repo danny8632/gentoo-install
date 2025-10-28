@@ -3,8 +3,11 @@
 readarray -t arr2 < <(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
 
 DISK_OPTIONS=$(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
-printf '%s\n' "${arr2[@]}"
-printf '%s\n' "${DISK_OPTIONS}"
+
+for key in "${!arr2[@]}"
+do
+  echo "Key for array is: $key"
+done
 
 
 DISK=$(read -r -p "What disk do you want to use? - (/dev/sda): ")
