@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DISK=$(read -n 1 -r -p "What disk do you want to use? - (/dev/sda): ")
+
 # Partition the disks
 (
   echo g;
@@ -24,7 +26,7 @@
   echo 3;
   echo 23;
   echo w;
-) | fdisk /dev/sda
+) | fdisk ${DISK}
 
 mkfs.xfs /dev/sda3
 mkfs.vfat -F 32 /dev/sda1
