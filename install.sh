@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DISK=$(read -n 1 -r -p "What disk do you want to use? - (/dev/sda): ")
+DISK=$(read -r -p "What disk do you want to use? - (/dev/sda): ")
 
 # Partition the disks
 (
