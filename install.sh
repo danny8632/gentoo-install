@@ -1,5 +1,19 @@
 #!/bin/bash
 
+i=0; arr1=()
+while IFS='' read -r value; do
+    arr1+=("$value")
+done <<-EOT
+$(printf '%s\n' fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
+EOT
+
+printf '%s\n' "${arr1[@]}"
+
+DISK_OPTIONS=$(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
+
+
+
+
 DISK=$(read -r -p "What disk do you want to use? - (/dev/sda): ")
 
 # Partition the disks
