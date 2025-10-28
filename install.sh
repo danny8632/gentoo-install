@@ -5,8 +5,8 @@ DISK_OPTIONS=$(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | 
 
 
 IFS=$'\n' read -r -d '' -a arr2 < <(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1; printf '\0')
-select i in "${arr2[@]}" "exit"; do
-    [[ $i == "exit" ]] && break
+select i in "${arr2[@]}" exit; do
+    [[ $i == exit ]] && break
     echo "$i which is number $REPLY"
 done
 
