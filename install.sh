@@ -1,5 +1,48 @@
 #!/bin/bash
 
+# Partition the disks
+(
+  echo g;
+  echo n;
+  echo ;
+  echo ;
+  echo +1G;
+  echo t;
+  echo 1;
+  echo n;
+  echo ;
+  echo ;
+  echo +16G;
+  echo t;
+  echo 2;
+  echo 19;
+  echo n
+  echo ;
+  echo ;
+  echo ;
+  echo t;
+  echo 3;
+  echo 23;
+  echo w;
+) | fdisk /dev/sda
+
+mkfs.xfs /dev/sda3
+mkfs.vfat -F 32 /dev/sda1
+mkswap /dev/sda2
+swapon /dev/sda2
+
+mkdir --parents /mnt/gentoo
+mount /dev/sda3 /mnt/gentoo
+mkdir --parents /mnt/gentoo/efi
+mount /dev/sda1 /mnt/gentoo/efi
+
+cd /mnt/gentoo
+
+wget https://mirrors.dotsrc.org/gentoo/releases/amd64/autobuilds/current-stage3-amd64-openrc/stage3-amd64-openrc-20251026T170339Z.tar.xz
+
+tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner -C /mnt/gentoo
+
+
 GET_ARCH="$(lscpu | grep -w '^Architecture' | sed 's/\s\s*/ /g' | cut -d ' ' -f 1 --complement | cut -d ' ' -f 1 -z)"
 
 _PARALLEL_THREADS="\$((\$(nproc)+1))"
