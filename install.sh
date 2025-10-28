@@ -6,7 +6,7 @@ DISK_OPTIONS=$(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | 
 
 for key in "${!arr2[@]}"
 do
-  echo "Key for array is: $key"
+  echo "Key is '$key'  => Value is '${arr2[$key]}'"
 done
 
 
