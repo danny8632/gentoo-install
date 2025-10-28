@@ -1,43 +1,42 @@
 #!/bin/bash
 
 
-DISK_OPTIONS=$(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
-
-
 IFS=$'\n' read -r -d '' -a arr2 < <(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1; printf '\0')
-select i in "${arr2[@]}" exit; do
-    [[ $i == exit ]] && break
-    echo "$i which is number $REPLY"
+select i in "${arr2[@]}"
+do
+    DISK=$($i | cut -d ',' -f 1)
+	echo "$DISK Has been selected"
+	break;
 done
 
 
-DISK=$(read -r -p "What disk do you want to use? - (/dev/sda): ")
+# DISK=$(read -r -p "What disk do you want to use? - (/dev/sda): ")
 
 # Partition the disks
 (
-  echo g;
-  echo n;
-  echo ;
-  echo ;
-  echo +1G;
-  echo t;
-  echo 1;
-  echo n;
-  echo ;
-  echo ;
-  echo +16G;
-  echo t;
-  echo 2;
-  echo 19;
-  echo n
-  echo ;
-  echo ;
-  echo ;
-  echo t;
-  echo 3;
-  echo 23;
-  echo w;
-) | fdisk ${DISK}
+    echo g;
+    echo n;
+    echo ;
+    echo ;
+    echo +1G;
+    echo t;
+    echo 1;
+    echo n;
+    echo ;
+    echo ;
+    echo +16G;
+    echo t;
+    echo 2;
+    echo 19;
+    echo n
+    echo ;
+    echo ;
+    echo ;
+    echo t;
+    echo 3;
+    echo 23;
+    echo w;
+) | fdisk "${DISK}"
 
 mkfs.xfs /dev/sda3
 mkfs.vfat -F 32 /dev/sda1
@@ -49,7 +48,7 @@ mount /dev/sda3 /mnt/gentoo
 mkdir --parents /mnt/gentoo/efi
 mount /dev/sda1 /mnt/gentoo/efi
 
-cd /mnt/gentoo
+cd /mnt/gentoo || exit
 
 wget https://mirrors.dotsrc.org/gentoo/releases/amd64/autobuilds/current-stage3-amd64-openrc/stage3-amd64-openrc-20251026T170339Z.tar.xz
 
@@ -74,8 +73,8 @@ TIMEZONE=Europe/Copenhagen # Change this to your relevant timezone located in "/
 CPU_ARCH="$(gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3 | cut -d ' ' -f 1 -z)"
 
 CFLAGS="-march=${CPU_ARCH} -mtune-${CPU_ARCH} -O3 -pipe -fno-plt -pthread -fsanitize=bounds,alignment,object-size -fsanitize-undefined-trap-on-error \
-        -fvisibility=hidden -fexceptions -Wformat -Werror=format-security \
-        -Wvla -Wimplicit-fallthrough -Wno-unused-result -Wno-unneeded-internal-declaration -Warray-bounds"
+		-fvisibility=hidden -fexceptions -Wformat -Werror=format-security \
+		-Wvla -Wimplicit-fallthrough -Wno-unused-result -Wno-unneeded-internal-declaration -Warray-bounds"
 
 emerge --oneshot --noreplace cpuid2cpuflags
 
