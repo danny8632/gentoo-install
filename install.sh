@@ -1,16 +1,9 @@
 #!/bin/bash
 
-i=0; arr1=()
-while IFS='' read -r value; do
-    arr1+=("$value")
-done <<-EOT
-$(printf '%s\n' fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
-EOT
-
-printf '%s\n' "${arr1[@]}"
+readarray -t arr2 < <(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
 
 DISK_OPTIONS=$(fdisk -l | grep -w '^Disk /dev' | cut -d ' ' -f 1 --complement | cut -d ',' -f 1)
-
+printf '%s\n' "${arr2[@]}"
 printf '%s\n' "${DISK_OPTIONS}"
 
 
