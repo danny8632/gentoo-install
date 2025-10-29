@@ -71,6 +71,7 @@ else
 fi
 
 
+sleep 2s
 # Partition the disks
 (
     echo g;
@@ -97,11 +98,14 @@ fi
     echo w;
 ) | fdisk "${DISK}"
 
-sleep 1s
+sleep 2s
 
 mkfs.xfs -f "${DISK}"3
+sleep 2s
 mkfs.vfat -F -I 32 "${DISK}"1
+sleep 2s
 mkswap "${DISK}"2
+sleep 2s
 swapon "${DISK}"2
 
 sleep 1s
