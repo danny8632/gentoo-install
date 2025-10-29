@@ -134,10 +134,10 @@ echo "USE=\"-* X aac aalib acl acpi adns afs alsa ao apache2 asm atm appindicato
 sleep 1s
 
 message "Installing cpuid2cpuflags"
-command emerge --q --oneshot app-portage/cpuid2cpuflags
+command emerge --quiet --oneshot app-portage/cpuid2cpuflags
 
 message "installing gcc!"
-command emerge --q --oneshot sys-devel/gcc
+command emerge --quiet --oneshot sys-devel/gcc
 echo "install is done!"
 
 message "Settings flags"
