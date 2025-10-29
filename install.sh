@@ -28,6 +28,14 @@ EMERGE="emerge"
 
 ROOT_FS_TYPE=xfs
 
+LRED='\033[01;31m'
+GREEN='\033[0;32m'
+LCYAN='\033[1;36m'
+LBLUE='\033[1;34m'
+LPURPLE='\033[0;35m'
+DGRAY='\033[1;30m'
+NC='\033[0m' # No Color
+
 message ()
 {
   echo
@@ -89,16 +97,22 @@ fi
     echo w;
 ) | fdisk "${DISK}"
 
+sleep 30s
+
 mkfs.xfs -f "${DISK}"3
 mkfs.vfat -F -I 32 "${DISK}"1
 mkswap "${DISK}"2
 swapon "${DISK}"2
+
+sleep 30s
 
 # Mounts the newly created partitions to /mnt/gentoo
 mkdir --parents /mnt/gentoo
 mount "${DISK}"3 /mnt/gentoo
 mkdir --parents /mnt/gentoo/efi
 mount "${DISK}"1 /mnt/gentoo/efi
+
+sleep 30s
 
 cd /mnt/gentoo || exit
 
@@ -117,34 +131,42 @@ echo "GENTOO_MIRRORS=\"https://mirrors.dotsrc.org/gentoo http://mirrors.dotsrc.o
 
 echo "USE=\"-* X aac aalib acl acpi adns afs alsa ao apache2 asm atm appindicator audiofile audit avif bash-completion big-endian brotli bzip2 caps cddb cdinstall cgi cjk connman cracklib crypt cuda cups curl cvs cxx dbm dbus dedicated dga djvu dri dts egl elogind encode exif expat fam fastcgi fbcon ffmpeg flac fontconfig ftp gd gdbm ggi gif gimp git gmp gsm gstreamer gui gzip heif http2 iconv icu idn imagemagick imap imlib index64 inotify io-uring ipv6 jack java javascript jbig jemalloc jit jpeg jpeg2k jpegxl keyring lame lash libcaca libffi libnotify libsamplerate libwww lm-sensors lto lua lz4 lzip lzma lzo mad man memcached mhash mmap mng modules modules-compress motif mp3 mp4 mpeg mpi mplayer mtp multilib mysql mysqli native-extensions ncurses netcdf networkmanager nls nsplugin nvenc ocaml ocamlopt odbc offensive openal opencl opengl openmp opus oracle orc osc oss otf pam pcre pda pdf perl php png policykit portaudio posix postgres ppds profile pulseaudio python raw rdp readline recode ruby sasl scanner screencast sctp sdl session smp snappy sndfile snmp soap sockets socks5 sound spell sqlite ssl subversion suid svg svga symlink syslog szip taglib tcl tcmalloc tcpd theora threads tiff time64 truetype ttf udev udisks uefi unicode unwind upnp upnp-av upower usb v4l vaapi vdpau vhosts videos vim-syntax vnc vorbis vpx vulkan wavpack wayland webkit webp wmf x264 xattr xcb xcomposite xft xinerama xml xmpp xpm xv xvid zeroconf zip zlib zsh-completion zstd gnome-keyring kde qt6\"" >> /mnt/gentoo/etc/portage/make.conf
 
+sleep 30s
 
-LRED='\033[01;31m'
-GREEN='\033[0;32m'
-LCYAN='\033[1;36m'
-LBLUE='\033[1;34m'
-LPURPLE='\033[0;35m'
-DGRAY='\033[1;30m'
-NC='\033[0m' # No Color
+message "Installing cpuid2cpuflags"
+command emerge --q --oneshot app-portage/cpuid2cpuflags
+
+message "installing gcc!"
+command emerge --q --oneshot sys-devel/gcc
+echo "install is done!"
+
+message "Settings flags"
+CPU_ARCH="$(gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3 | cut -d ' ' -f 1 -z)"
+CFLAGS="-march=${CPU_ARCH} -mtune-${CPU_ARCH} -O3 -pipe -fno-plt -pthread -fsanitize=bounds,alignment,object-size -fsanitize-undefined-trap-on-error \
+        -fvisibility=hidden -fexceptions -Wformat -Werror=format-security \
+        -Wvla -Wimplicit-fallthrough -Wno-unused-result -Wno-unneeded-internal-declaration -Warray-bounds"
+CPU_FLAGS=$(cpuid2cpuflags | cut -c 1-15 --complement)
 
 
 
 
+install_gentoo_prep()
+{
+  # Copy DNS info
+  cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
 
+  # Mounting the necessary filesystems
+  mount --types proc /proc /mnt/gentoo/proc
+  mount --rbind /sys /mnt/gentoo/sys
+  mount --make-rslave /mnt/gentoo/sys
+  mount --rbind /dev /mnt/gentoo/dev
+  mount --make-rslave /mnt/gentoo/dev
+  mount --bind /run /mnt/gentoo/run
+  mount --make-slave /mnt/gentoo/run
 
-# Copy DNS info
-cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
-
-# Mounting the necessary filesystems
-mount --types proc /proc /mnt/gentoo/proc
-mount --rbind /sys /mnt/gentoo/sys
-mount --make-rslave /mnt/gentoo/sys
-mount --rbind /dev /mnt/gentoo/dev
-mount --make-rslave /mnt/gentoo/dev
-mount --bind /run /mnt/gentoo/run
-mount --make-slave /mnt/gentoo/run
-
-# Entering the new environment
-command chroot /mnt/gentoo /bin/env -i TERM="${TERM}" /bin/bash -c "install_gentoo_chroot"
+  # Entering the new environment
+  command chroot /mnt/gentoo /bin/env -i TERM="${TERM}" /bin/bash -c "install_gentoo_chroot"
+}
 
 
 install_gentoo_chroot()
@@ -157,20 +179,6 @@ install_gentoo_chroot()
   command emerge-webrsync
   message "Updating portage tree"
   command emerge --sync
-
-  message "Installing cpuid2cpuflags"
-  command emerge --q --oneshot app-portage/cpuid2cpuflags
-
-  message "installing gcc!"
-  command emerge --q --oneshot sys-devel/gcc
-  echo "install is done!"
-
-  message "Settings flags"
-  CPU_ARCH="$(gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3 | cut -d ' ' -f 1 -z)"
-  CFLAGS="-march=${CPU_ARCH} -mtune-${CPU_ARCH} -O3 -pipe -fno-plt -pthread -fsanitize=bounds,alignment,object-size -fsanitize-undefined-trap-on-error \
-          -fvisibility=hidden -fexceptions -Wformat -Werror=format-security \
-          -Wvla -Wimplicit-fallthrough -Wno-unused-result -Wno-unneeded-internal-declaration -Warray-bounds"
-  CPU_FLAGS=$(cpuid2cpuflags | cut -c 1-15 --complement)
 
 message "Configuring /etc/portage/env/compiler-gcc"
   cat << EOF > /etc/portage/env/compiler-gcc
@@ -710,3 +718,41 @@ EOF
 
 
 
+
+
+#exporting necessary functions and variables
+export -f install_gentoo_chroot
+export -f message
+export -f command
+
+export LRED
+export GREEN
+export LCYAN
+export LBLUE
+export LPURPLE
+export DGRAY
+export NC
+
+export TIMEZONE
+export CPU_ARCH
+export CPU_FLAGS
+export USE_FLAGS
+export IS_SSD
+export IS_NVME
+export ROOT_FS_TYPE
+export HOSTNAME
+export CFLAGS
+export PACKAGES
+export MAKE_OPTIONS
+export TOOLS
+export LATE_PACKAGES
+export USE_KERNEL_CONFIG
+export INSTALL_NVIDIA_DRIVER
+export INSTALL_NVIDIA_OPEN_GPU_MODULES
+export USED_VIDEO_CARDS
+export INSTALL_STEAM
+export EMERGE
+export INSTALL_GAME_EMULATORS
+export MAKE_CLANG_DEFAULT_COMPILER
+
+install_gentoo_prep
