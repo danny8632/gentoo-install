@@ -50,7 +50,7 @@ IFS=$'\n' read -r -d '' -a arr2 < <(fdisk -l | grep -w '^Disk /dev' | cut -d ' '
 PS3="Select the disk you want to partition: "
 select i in "${arr2[@]}"
 do
-  DISK=$($i | cut -d ',' -f 1)
+  DISK="$($i | cut -d ',' -f 1)"
 	echo "$DISK Has been selected"
 	break;
 done
