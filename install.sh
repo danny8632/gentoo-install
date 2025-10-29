@@ -121,39 +121,21 @@ command wget https://mirrors.dotsrc.org/gentoo/releases/amd64/autobuilds/current
 command tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner -C /mnt/gentoo
 
 # Sets some make.conf values
-command sed -i 's/^COMMON_FLAGS=.*/COMMON_FLAGS="-O2 -pipe -march=native"/' /mnt/gentoo/etc/portage/make.conf
+sed -i 's/^COMMON_FLAGS=.*/COMMON_FLAGS="-O2 -pipe -march=native"/' /mnt/gentoo/etc/portage/make.conf
 
-command echo "RUSTFLAGS=\"-C opt-level=3 -C target-cpu=native\"" >> /mnt/gentoo/etc/portage/make.conf
+echo "RUSTFLAGS=\"-C opt-level=3 -C target-cpu=native\"" >> /mnt/gentoo/etc/portage/make.conf
 
-command echo "MAKEOPTS=\"-j$(( $(nproc) + 1 ))\"" >> /mnt/gentoo/etc/portage/make.conf
+echo "MAKEOPTS=\"-j$(( $(nproc) + 1 ))\"" >> /mnt/gentoo/etc/portage/make.conf
 
-command echo "GENTOO_MIRRORS=\"https://mirrors.dotsrc.org/gentoo http://mirrors.dotsrc.org/gentoo\"" >> /mnt/gentoo/etc/portage/make.conf
+echo "GENTOO_MIRRORS=\"https://mirrors.dotsrc.org/gentoo http://mirrors.dotsrc.org/gentoo\"" >> /mnt/gentoo/etc/portage/make.conf
 
-command echo "USE=\"-* X aac aalib acl acpi adns afs alsa ao apache2 asm atm appindicator audiofile audit avif bash-completion big-endian brotli bzip2 caps cddb cdinstall cgi cjk connman cracklib crypt cuda cups curl cvs cxx dbm dbus dedicated dga djvu dri dts egl elogind encode exif expat fam fastcgi fbcon ffmpeg flac fontconfig ftp gd gdbm ggi gif gimp git gmp gsm gstreamer gui gzip heif http2 iconv icu idn imagemagick imap imlib index64 inotify io-uring ipv6 jack java javascript jbig jemalloc jit jpeg jpeg2k jpegxl keyring lame lash libcaca libffi libnotify libsamplerate libwww lm-sensors lto lua lz4 lzip lzma lzo mad man memcached mhash mmap mng modules modules-compress motif mp3 mp4 mpeg mpi mplayer mtp multilib mysql mysqli native-extensions ncurses netcdf networkmanager nls nsplugin nvenc ocaml ocamlopt odbc offensive openal opencl opengl openmp opus oracle orc osc oss otf pam pcre pda pdf perl php png policykit portaudio posix postgres ppds profile pulseaudio python raw rdp readline recode ruby sasl scanner screencast sctp sdl session smp snappy sndfile snmp soap sockets socks5 sound spell sqlite ssl subversion suid svg svga symlink syslog szip taglib tcl tcmalloc tcpd theora threads tiff time64 truetype ttf udev udisks uefi unicode unwind upnp upnp-av upower usb v4l vaapi vdpau vhosts videos vim-syntax vnc vorbis vpx vulkan wavpack wayland webkit webp wmf x264 xattr xcb xcomposite xft xinerama xml xmpp xpm xv xvid zeroconf zip zlib zsh-completion zstd gnome-keyring kde qt6\"" >> /mnt/gentoo/etc/portage/make.conf
+echo "USE=\"-* X aac aalib acl acpi adns afs alsa ao apache2 asm atm appindicator audiofile audit avif bash-completion big-endian brotli bzip2 caps cddb cdinstall cgi cjk connman cracklib crypt cuda cups curl cvs cxx dbm dbus dedicated dga djvu dri dts egl elogind encode exif expat fam fastcgi fbcon ffmpeg flac fontconfig ftp gd gdbm ggi gif gimp git gmp gsm gstreamer gui gzip heif http2 iconv icu idn imagemagick imap imlib index64 inotify io-uring ipv6 jack java javascript jbig jemalloc jit jpeg jpeg2k jpegxl keyring lame lash libcaca libffi libnotify libsamplerate libwww lm-sensors lto lua lz4 lzip lzma lzo mad man memcached mhash mmap mng modules modules-compress motif mp3 mp4 mpeg mpi mplayer mtp multilib mysql mysqli native-extensions ncurses netcdf networkmanager nls nsplugin nvenc ocaml ocamlopt odbc offensive openal opencl opengl openmp opus oracle orc osc oss otf pam pcre pda pdf perl php png policykit portaudio posix postgres ppds profile pulseaudio python raw rdp readline recode ruby sasl scanner screencast sctp sdl session smp snappy sndfile snmp soap sockets socks5 sound spell sqlite ssl subversion suid svg svga symlink syslog szip taglib tcl tcmalloc tcpd theora threads tiff time64 truetype ttf udev udisks uefi unicode unwind upnp upnp-av upower usb v4l vaapi vdpau vhosts videos vim-syntax vnc vorbis vpx vulkan wavpack wayland webkit webp wmf x264 xattr xcb xcomposite xft xinerama xml xmpp xpm xv xvid zeroconf zip zlib zsh-completion zstd gnome-keyring kde qt6\"" >> /mnt/gentoo/etc/portage/make.conf
 
 sleep 1s
 
-message "Installing portage snapshot"
-command emerge-webrsync
-message "Updating portage tree"
-command emerge --sync
-
-message "Installing cpuid2cpuflags"
-command emerge --quiet --oneshot app-portage/cpuid2cpuflags
-
-message "installing gcc!"
-command emerge --quiet --oneshot sys-devel/gcc
-echo "install is done!"
-
-message "Settings flags"
-CPU_ARCH="$(gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3 | cut -d ' ' -f 1 -z)"
-CFLAGS="-march=${CPU_ARCH} -mtune-${CPU_ARCH} -O3 -pipe -fno-plt -pthread -fsanitize=bounds,alignment,object-size -fsanitize-undefined-trap-on-error \
-        -fvisibility=hidden -fexceptions -Wformat -Werror=format-security \
-        -Wvla -Wimplicit-fallthrough -Wno-unused-result -Wno-unneeded-internal-declaration -Warray-bounds"
-CPU_FLAGS=$(cpuid2cpuflags | cut -c 1-15 --complement)
-
 install_gentoo_prep()
 {
+  message "Running gentoo prep"
   # Copy DNS info
   cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
 
@@ -181,6 +163,20 @@ install_gentoo_chroot()
   command emerge-webrsync
   message "Updating portage tree"
   command emerge --sync
+
+  message "Installing cpuid2cpuflags"
+  command emerge --quiet --oneshot app-portage/cpuid2cpuflags
+
+  message "installing gcc!"
+  command emerge --quiet --oneshot sys-devel/gcc
+  echo "install is done!"
+
+  message "Settings flags"
+  CPU_ARCH="$(gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3 | cut -d ' ' -f 1 -z)"
+  CFLAGS="-march=${CPU_ARCH} -mtune-${CPU_ARCH} -O3 -pipe -fno-plt -pthread -fsanitize=bounds,alignment,object-size -fsanitize-undefined-trap-on-error \
+          -fvisibility=hidden -fexceptions -Wformat -Werror=format-security \
+          -Wvla -Wimplicit-fallthrough -Wno-unused-result -Wno-unneeded-internal-declaration -Warray-bounds"
+  CPU_FLAGS=$(cpuid2cpuflags | cut -c 1-15 --complement)
 
 message "Configuring /etc/portage/env/compiler-gcc"
   cat << EOF > /etc/portage/env/compiler-gcc
