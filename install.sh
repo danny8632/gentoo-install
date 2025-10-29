@@ -652,7 +652,7 @@ EOF
   command eselect locale set en_DK.utf8
 
   message "Selecting keymap"
-  command sed -i "/keymap=/c\\keymap=\"da\"" /etc/conf.d/keymaps
+  command sed -i "/keymap=/c\\keymap=\"dk\"" /etc/conf.d/keymaps
 
   message "Reloading Environment"
   command env-update && source /etc/profile && export PS1="(chroot) $PS1"
