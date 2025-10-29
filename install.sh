@@ -152,7 +152,7 @@ install_gentoo_prep()
   mount --bind /run /mnt/gentoo/run
   mount --make-slave /mnt/gentoo/run
 
-  command cp chroot.sh /mnt/gentoo/chroot.sh
+  command cp /root/gentoo-install/chroot.sh /mnt/gentoo/chroot.sh
   command chmod +x /mnt/gentoo/chroot.sh
 
   # Entering the new environment
