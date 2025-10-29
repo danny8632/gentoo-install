@@ -154,3 +154,5 @@ install_gentoo_prep()
   # Entering the new environment
   command chroot /mnt/gentoo /bin/env -i TERM="${TERM}" /bin/bash -c "./chroot.sh"
 }
+
+install_gentoo_prep
