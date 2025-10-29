@@ -97,14 +97,14 @@ fi
     echo w;
 ) | fdisk "${DISK}"
 
-sleep 30s
+sleep 1s
 
 mkfs.xfs -f "${DISK}"3
 mkfs.vfat -F -I 32 "${DISK}"1
 mkswap "${DISK}"2
 swapon "${DISK}"2
 
-sleep 30s
+sleep 1s
 
 # Mounts the newly created partitions to /mnt/gentoo
 mkdir --parents /mnt/gentoo
@@ -112,7 +112,7 @@ mount "${DISK}"3 /mnt/gentoo
 mkdir --parents /mnt/gentoo/efi
 mount "${DISK}"1 /mnt/gentoo/efi
 
-sleep 30s
+sleep 1s
 
 cd /mnt/gentoo || exit
 
@@ -131,7 +131,7 @@ echo "GENTOO_MIRRORS=\"https://mirrors.dotsrc.org/gentoo http://mirrors.dotsrc.o
 
 echo "USE=\"-* X aac aalib acl acpi adns afs alsa ao apache2 asm atm appindicator audiofile audit avif bash-completion big-endian brotli bzip2 caps cddb cdinstall cgi cjk connman cracklib crypt cuda cups curl cvs cxx dbm dbus dedicated dga djvu dri dts egl elogind encode exif expat fam fastcgi fbcon ffmpeg flac fontconfig ftp gd gdbm ggi gif gimp git gmp gsm gstreamer gui gzip heif http2 iconv icu idn imagemagick imap imlib index64 inotify io-uring ipv6 jack java javascript jbig jemalloc jit jpeg jpeg2k jpegxl keyring lame lash libcaca libffi libnotify libsamplerate libwww lm-sensors lto lua lz4 lzip lzma lzo mad man memcached mhash mmap mng modules modules-compress motif mp3 mp4 mpeg mpi mplayer mtp multilib mysql mysqli native-extensions ncurses netcdf networkmanager nls nsplugin nvenc ocaml ocamlopt odbc offensive openal opencl opengl openmp opus oracle orc osc oss otf pam pcre pda pdf perl php png policykit portaudio posix postgres ppds profile pulseaudio python raw rdp readline recode ruby sasl scanner screencast sctp sdl session smp snappy sndfile snmp soap sockets socks5 sound spell sqlite ssl subversion suid svg svga symlink syslog szip taglib tcl tcmalloc tcpd theora threads tiff time64 truetype ttf udev udisks uefi unicode unwind upnp upnp-av upower usb v4l vaapi vdpau vhosts videos vim-syntax vnc vorbis vpx vulkan wavpack wayland webkit webp wmf x264 xattr xcb xcomposite xft xinerama xml xmpp xpm xv xvid zeroconf zip zlib zsh-completion zstd gnome-keyring kde qt6\"" >> /mnt/gentoo/etc/portage/make.conf
 
-sleep 30s
+sleep 1s
 
 message "Installing cpuid2cpuflags"
 command emerge --q --oneshot app-portage/cpuid2cpuflags
